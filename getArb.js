@@ -41,7 +41,7 @@ function printArb() {
             console.log("gdaxPrice", gdaxPrice);
             console.log("bittrexPrice", bittrexPrice);
             console.log("arb %d", rate)
-            if (rate >= 0.7) {
+            if (rate >= 0.07) {
                 console.log("Do the trade now!")
             }
         });
