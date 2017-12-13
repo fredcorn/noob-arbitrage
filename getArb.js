@@ -1,4 +1,6 @@
 var request = require("request");
+var util = require('util')
+// var setIntervalProm = util.promisify(setInterval)
 var gdaxPrice
 var bittrexPrice
 
@@ -24,17 +26,26 @@ var bittrexOptions = {
     }
 };
 
-request(gdaxOptions, function (error, response, body1) {
-    // console.log(body1)
-    var res1 = JSON.parse(body1)
-    gdaxPrice = Number(res1.price)
-    if (error) throw new Error(error);
-    request(bittrexOptions, function (error, response, body2) {
-        var res2 = JSON.parse(body2)
+
+function printArb() {
+    request(gdaxOptions, function (error, response, body1) {
+        console.log("\n")
+        var res1 = JSON.parse(body1)
+        gdaxPrice = Number(res1.price)
         if (error) throw new Error(error);
-        bittrexPrice = Number(res2.result[0].Price)
-        console.log("gdaxPrice", gdaxPrice);
-        console.log("bittrexPrice", bittrexPrice);
-        console.log("arb %d", (gdaxPrice-bittrexPrice)/bittrexPrice)
+        request(bittrexOptions, function (error, response, body2) {
+            var res2 = JSON.parse(body2)
+            if (error) throw new Error(error);
+            bittrexPrice = Number(res2.result[0].Price)
+            var rate = (gdaxPrice - bittrexPrice) / bittrexPrice
+            console.log("gdaxPrice", gdaxPrice);
+            console.log("bittrexPrice", bittrexPrice);
+            console.log("arb %d", rate)
+            if (rate >= 0.7) {
+                console.log("Do the trade now!")
+            }
+        });
     });
-});
+}
+
+setInterval(printArb, 3000)
