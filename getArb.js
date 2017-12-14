@@ -29,15 +29,26 @@ var bittrexOptions = {
 
 function printArb() {
     request(gdaxOptions, function (error, response, body1) {
-        var res1 = JSON.parse(body1)
-        gdaxPrice = Number(res1.price)
+        var res1
+        try{
+            res1 = JSON.parse(body1)
+        }catch(e){
+            console.log(e.stack)
+        }
+        
+        gdaxPrice = res1?Number(res1.price):null
         if (error) throw new Error(error);
         request(bittrexOptions, function (error, response, body2) {
-            var res2 = JSON.parse(body2)
+            var res2
+            try{
+                res2 = JSON.parse(body2)
+            }catch(e){
+                console.log(e.stack)
+            }
             if (error) throw new Error(error);
-            bittrexPrice = Number(res2.result[0].Price)
+            bittrexPrice = res2&&res2.result?Number(res2.result[0].Price):null
             var rate = (gdaxPrice - bittrexPrice) / bittrexPrice
-            console.log("gdaxPrice %d, bittrexPrice %d. [arb %d%]", gdaxPrice, bittrexPrice, (rate*100).toFixed(3));
+            console.log("gdax %d, bittrex %d. [arb %d%]", gdaxPrice, bittrexPrice, (rate*100).toFixed(3));
             if (rate >= 0.05) {
                 console.log("Do the trade now!")
             }
