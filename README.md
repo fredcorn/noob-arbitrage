@@ -1,4 +1,8 @@
 # noob-arbitrage
+npm install nodemon -g
+
 npm install
 
-node getArb.js
+nodemon getArb.js <targetCryptocurrenty>
+
+* targetCryptocurrenty: "ETH", "LTC" ...
