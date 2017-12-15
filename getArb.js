@@ -5,7 +5,6 @@ var gdaxPrice
 var bittrexPrice
 var targetProduct = "LTC"
 
-console.log(process.argv)
 if(process.argv) {
     targetProduct = process.argv[2]
     console.log("targetProduct %s", targetProduct)
