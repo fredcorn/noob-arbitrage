@@ -3,10 +3,17 @@ var util = require('util')
 // var setIntervalProm = util.promisify(setInterval)
 var gdaxPrice
 var bittrexPrice
+var targetProduct = "LTC"
+
+console.log(process.argv)
+if(process.argv) {
+    targetProduct = process.argv[2]
+    console.log("targetProduct %s", targetProduct)
+}
 
 var gdaxOptions = {
     method: 'GET',
-    url: 'https://api.gdax.com/products/LTC-BTC/ticker',
+    url: `https://api.gdax.com/products/${targetProduct}-BTC/ticker`,
     headers:
     {
         'user-agent': "self-program",
@@ -18,7 +25,7 @@ var gdaxOptions = {
 var bittrexOptions = {
     method: 'GET',
     url: 'https://bittrex.com/api/v1.1/public/getmarkethistory',
-    qs: { market: 'BTC-LTC' },
+    qs: { market: `BTC-${targetProduct}` },
     headers:
     {
         'postman-token': '5fd77a68-0932-e0e5-efcc-099a5867259a',
