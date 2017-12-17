@@ -119,11 +119,11 @@ function getPriceComparison(exchange1, exchange2, cryptoName) {
 function printArb() {
     var promises = [getPriceComparison("GDAX", "bittrex", "ETH"), getPriceComparison("GDAX", "bittrex", "LTC")]
     Promise.all(promises)
-    .then(function(comparisons){
-        console.log("----------------------------------------------------------------------")
-        console.log(comparisons[0])
-        console.log(comparisons[1])
-    });
+        .then(function (comparisons) {
+            console.log("----------------------------------------------------------------------")
+            console.log(comparisons[0])
+            console.log(comparisons[1])
+        });
 }
 
 setInterval(printArb, 3000)
