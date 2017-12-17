@@ -8,7 +8,7 @@ var targetProduct = "LTC"
 
 if (process.argv) {
     targetProduct = process.argv[2]
-    console.log("targetProduct %s", targetProduct)
+    // console.log("targetProduct %s", targetProduct)
 }
 
 var gdaxOptions = {
@@ -22,32 +22,6 @@ var gdaxOptions = {
         }
 };
 
-var gdaxBTCUSDOptions = {
-    method: 'GET',
-    url: `https://api.gdax.com/products/BTC-USD/ticker`,
-    headers:
-        {
-            'user-agent': "self-program",
-            'postman-token': '5d4de71d-e4c2-3af1-30cf-5840b6c39ae2',
-            'cache-control': 'no-cache'
-        }
-};
-
-function getBTCUSD() {
-    return new Promise(function(resolve, reject) {
-        request(gdaxBTCUSDOptions, function(error, response, body) {
-            var res1
-            try {
-                res1 = JSON.parse(body)
-            } catch (e) {
-                console.log(e.stack)
-                reject(e)
-            }
-            var gdaxPrice = res1 ? Number(res1.price) : null
-            resolve(gdaxPrice);
-        });
-    });
-}
 
 var bittrexOptions = {
     method: 'GET',
@@ -61,37 +35,95 @@ var bittrexOptions = {
 };
 
 
-function printArb() {
-    getBTCUSD()
-    .then(function(usdPrice){
-        request(gdaxOptions, function (error, response, body1) {
+var gdaxBTCUSDOptions = {
+    method: 'GET',
+    url: `https://api.gdax.com/products/BTC-USD/ticker`,
+    headers:
+        {
+            'user-agent': "self-program",
+            'postman-token': '5d4de71d-e4c2-3af1-30cf-5840b6c39ae2',
+            'cache-control': 'no-cache'
+        }
+};
+
+function getUSDPrice(cryptoName) {
+    gdaxBTCUSDOptions.url = `https://api.gdax.com/products/${cryptoName}-USD/ticker`;
+    return new Promise(function (resolve, reject) {
+        request(gdaxBTCUSDOptions, function (error, response, body) {
             var res1
             try {
-                res1 = JSON.parse(body1)
+                res1 = JSON.parse(body)
             } catch (e) {
                 console.log(e.stack)
+                reject(e)
             }
-    
-            gdaxPrice = res1 ? Number(res1.price) : null
-            if (error) throw new Error(error);
-            request(bittrexOptions, function (error, response, body2) {
-                var res2
+            var gdaxPrice = res1 ? Number(res1.price) : null
+            resolve(gdaxPrice);
+        });
+    });
+}
+
+function getBTCTargetPrice(exchangeName, targetName) {
+    if (exchangeName === 'GDAX') {
+        gdaxOptions.url = `https://api.gdax.com/products/${targetName}-BTC/ticker`;
+        return new Promise(function (resolve, reject) {
+            request(gdaxOptions, function (error, response, body) {
+                var res
                 try {
-                    res2 = JSON.parse(body2)
+                    res = JSON.parse(body)
                 } catch (e) {
                     console.log(e.stack)
+                    reject(e)
                 }
-                if (error) throw new Error(error);
-                bittrexPrice = res2 && res2.result ? Number(res2.result[0].Price) : null
-                var rate = (gdaxPrice - bittrexPrice) / bittrexPrice
-                console.log("gdax %d, bittrex %d. [arb %d%] [USD: $%d/BTC @GDAX]", gdaxPrice, bittrexPrice, (rate * 100).toFixed(3), usdPrice);
-                if (rate >= 0.05) {
-                    console.log("Do the trade now!")
-                }
+                var gdaxPrice = res ? Number(res.price) : null
+                resolve(gdaxPrice);
             });
         });
-    })
-    
+    } else if (exchangeName === 'bittrex') {
+        bittrexOptions.qs.market = `BTC-${targetName}`;
+        return new Promise(function (resolve, reject) {
+            request(bittrexOptions, function (error, response, body) {
+                var res
+                try {
+                    res = JSON.parse(body)
+                } catch (e) {
+                    console.log(e.stack)
+                    reject(e)
+                }
+                var bittrexPrice = res && res.result ? Number(res.result[0].Price) : null
+                resolve(bittrexPrice);
+            });
+        });
+    }
+}
+
+function getPriceComparison(exchange1, exchange2, cryptoName) {
+    var promises = []
+    promises.push(getUSDPrice('BTC'))
+    promises.push(getUSDPrice('ETH'))
+    promises.push(getUSDPrice('LTC'))
+    promises.push(getBTCTargetPrice(exchange1, cryptoName))
+    promises.push(getBTCTargetPrice(exchange2, cryptoName))
+    return Promise.all(promises)
+        .then(function (prices) {
+            var btcPrice = prices[0]
+            var ethPrice = prices[1]
+            var ltcPrice = prices[2]
+            var exchangePrice1 = prices[3]
+            var exchangePrice2 = prices[4]
+            var rate = (exchangePrice1 - exchangePrice2) / exchangePrice2
+            return `${cryptoName}: ${exchange1} ${exchangePrice1}, ${exchange2} ${exchangePrice2}. [arb ${(rate * 100).toFixed(3)}%] [USD(@GDAX): $${btcPrice}/BTC], $${ethPrice}/ETH], $${ltcPrice}/LTC]`;
+        })
+}
+
+function printArb() {
+    var promises = [getPriceComparison("GDAX", "bittrex", "ETH"), getPriceComparison("GDAX", "bittrex", "LTC")]
+    Promise.all(promises)
+    .then(function(comparisons){
+        console.log("----------------------------------------------------------------------")
+        console.log(comparisons[0])
+        console.log(comparisons[1])
+    });
 }
 
 setInterval(printArb, 3000)
