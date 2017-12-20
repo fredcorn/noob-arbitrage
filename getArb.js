@@ -158,9 +158,9 @@ var prevPrices = {}
 function printPrices(){
     listPrices()
     .then(function (prices) {
+        var bccBtcPriceChangeRate = (prices.bccBtcPrice - prevPrices.bccBtcPrice) / prevPrices.bccBtcPrice * 100
         prevPrices = prices
-        var bccBtcPriceRate = (prices.bccBtcPrice - prevPrices.bccBtcPrice) / prevPrices.bccBtcPrice * 100
-        var msg = `$${prices.btcPrice}/BTC, $${prices.bchPrice}/BCH, $${prices.ethPrice}/ETH, $${prices.ltcPrice}/LTC, BTC/BCH $${prices.bccBtcPrice} (${bccBtcPriceRate.toFixed(4)}%)`
+        var msg = `$${prices.btcPrice}/BTC, $${prices.bchPrice}/BCH, $${prices.ethPrice}/ETH, $${prices.ltcPrice}/LTC, BTC/BCH $${prices.bccBtcPrice} (${bccBtcPriceChangeRate.toFixed(4)}%)`
         console.log(msg)
     });
 }
