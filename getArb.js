@@ -99,6 +99,7 @@ function getBTCTargetPrice(exchangeName, targetName) {
 
 function getPriceComparison(exchange1, exchange2, cryptoName) {
     var promises = []
+    promises.push(getUSDPrice('BCH'))
     promises.push(getUSDPrice('BTC'))
     promises.push(getUSDPrice('ETH'))
     promises.push(getUSDPrice('LTC'))
@@ -106,13 +107,14 @@ function getPriceComparison(exchange1, exchange2, cryptoName) {
     promises.push(getBTCTargetPrice(exchange2, cryptoName))
     return Promise.all(promises)
         .then(function (prices) {
-            var btcPrice = prices[0]
-            var ethPrice = prices[1]
-            var ltcPrice = prices[2]
-            var exchangePrice1 = prices[3]
-            var exchangePrice2 = prices[4]
+            var bchPrice = prices[0]
+            var btcPrice = prices[1]
+            var ethPrice = prices[2]
+            var ltcPrice = prices[3]
+            var exchangePrice1 = prices[4]
+            var exchangePrice2 = prices[5]
             var rate = (exchangePrice1 - exchangePrice2) / exchangePrice2
-            return `${cryptoName}: ${exchange1} ${exchangePrice1}, ${exchange2} ${exchangePrice2}. [arb ${(rate * 100).toFixed(3)}%] [USD(@GDAX): $${btcPrice}/BTC], $${ethPrice}/ETH], $${ltcPrice}/LTC]`;
+            return `${cryptoName}: ${exchange1} ${exchangePrice1}, ${exchange2} ${exchangePrice2}. [arb ${(rate * 100).toFixed(3)}%] [USD(@GDAX): $${btcPrice}/BTC, $${bchPrice}/BCH, $${ethPrice}/ETH, $${ltcPrice}/LTC]`;
         })
 }
 
