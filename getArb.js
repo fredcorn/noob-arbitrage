@@ -118,6 +118,31 @@ function getPriceComparison(exchange1, exchange2, cryptoName) {
         })
 }
 
+function listPrices() {
+    var promises = []
+    promises.push(getUSDPrice('BCH'))
+    promises.push(getUSDPrice('BTC'))
+    promises.push(getUSDPrice('ETH'))
+    promises.push(getUSDPrice('LTC'))
+    promises.push(getBTCTargetPrice("bittrex", "BCC"))
+    return Promise.all(promises)
+    .then(function (prices) {
+        var bchPrice = prices[0]
+        var btcPrice = prices[1]
+        var ethPrice = prices[2]
+        var ltcPrice = prices[3]
+        var bccBtcPrice = prices[4]
+        return {
+            bchPrice,
+            btcPrice,
+            ethPrice,
+            ltcPrice,
+            bccBtcPrice
+        }
+        
+    })
+}
+
 function printArb() {
     var promises = [getPriceComparison("GDAX", "bittrex", "ETH"), getPriceComparison("GDAX", "bittrex", "LTC")]
     Promise.all(promises)
@@ -128,4 +153,17 @@ function printArb() {
         });
 }
 
-setInterval(printArb, 3000)
+var prevPrices = {}
+
+function printPrices(){
+    // var promises = [listPrices()]
+    listPrices()
+    .then(function (prices) {
+        prevPrices = prices
+        var msg = `$${prices.btcPrice}/BTC, $${prices.bchPrice}/BCH, $${prices.ethPrice}/ETH, $${prices.ltcPrice}/LTC, BTC/BCH$${prices.bccBtcPrice}`
+        console.log(msg)
+    });
+}
+
+// setInterval(printArb, 3000)
+setInterval(printPrices, 3000)
