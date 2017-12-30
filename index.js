@@ -155,7 +155,7 @@ let prevUSDPrices
 let prevBTCPrices
 
 function listPrices() {
-  const usdPricesSymbols = ['BCH', 'BTC', 'ETH', 'LTC']
+  const usdPricesSymbols = ['BTC', 'BCH', 'ETH', 'LTC']
   const btcPricesSymbols = ['BCC', 'XRP']
   Promise.resolve()
     .then(() => {
@@ -181,7 +181,7 @@ function listPrices() {
     .then((btcPrices) => {
       const msg =
         _.join(_.map(btcPrices, (curPrice) => {
-          let msgChunk = `BTC/${curPrice.symbol}:$${curPrice.price}`
+          let msgChunk = `BTC-${curPrice.symbol}:${curPrice.price}`
           if (prevBTCPrices) {
             const prevPrice = prevBTCPrices[curPrice.symbol]
             comparePrices(prevPrice, curPrice)
