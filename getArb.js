@@ -125,6 +125,7 @@ function listPrices() {
     promises.push(getUSDPrice('ETH'))
     promises.push(getUSDPrice('LTC'))
     promises.push(getBTCTargetPrice("bittrex", "BCC"))
+    promises.push(getBTCTargetPrice("bittrex", "XRP"))
     return Promise.all(promises)
     .then(function (prices) {
         var bchPrice = prices[0]
@@ -132,12 +133,14 @@ function listPrices() {
         var ethPrice = prices[2]
         var ltcPrice = prices[3]
         var bccBtcPrice = prices[4]
+        var xrpBtcPrice = prices[5]
         return {
             bchPrice,
             btcPrice,
             ethPrice,
             ltcPrice,
-            bccBtcPrice
+            bccBtcPrice,
+            xrpBtcPrice
         }
         
     })
@@ -159,9 +162,13 @@ function printPrices(){
     listPrices()
     .then(function (prices) {
         var bccBtcPriceChangeRate = (prices.bccBtcPrice - prevPrices.bccBtcPrice) / prevPrices.bccBtcPrice * 100
-        prevPrices = prices
-        var msg = `$${prices.btcPrice}/BTC, $${prices.bchPrice}/BCH, $${prices.ethPrice}/ETH, $${prices.ltcPrice}/LTC, BTC/BCH $${prices.bccBtcPrice} (${bccBtcPriceChangeRate.toFixed(4)}%)`
+        var xrpBtcPriceChangeRate = (prices.xrpBtcPrice - prevPrices.xrpBtcPrice) / prevPrices.xrpBtcPrice * 100
+        var msg = `$${prices.btcPrice}/BTC, $${prices.bchPrice}/BCH, $${prices.ethPrice}/ETH, $${prices.ltcPrice}/LTC`
+        console.log("--------------------------------")
         console.log(msg)
+        var msg2 = `BTC/BCH $${prices.bccBtcPrice} (${bccBtcPriceChangeRate.toFixed(4)}%), BTC/XRP $${prices.xrpBtcPrice} (${xrpBtcPriceChangeRate.toFixed(4)}%)`
+        console.log(msg2)
+        prevPrices = prices
     });
 }
 
