@@ -156,21 +156,21 @@ let prevBTCPrices
 
 function listPrices() {
   const usdPricesSymbols = ['BTC', 'BCH', 'ETH', 'LTC']
-  const btcPricesSymbols = ['BCC', 'XRP']
+  const btcPricesSymbols = ['XRP', 'ADA', 'SNT', 'STORJ']
   const promises = [getUSDPrices(usdPricesSymbols), getBTCTargetPrices('bittrex', btcPricesSymbols)]
   Promise.all(promises)
-  .then((results)=>{
-    console.log('---------------------------------')
-    const usdPrices = results[0]
-    const btcPrices = results[1]
-    const msg1 =
+    .then((results) => {
+      console.log('---------------------------------')
+      const usdPrices = results[0]
+      const btcPrices = results[1]
+      const msg1 =
         _.join(_.map(usdPrices, (usdPrice) => {
           let msgChunk = `${usdPrice.symbol}:$${usdPrice.price}`
           if (prevUSDPrices) {
             const prevPrice = prevUSDPrices[usdPrice.symbol]
             comparePrices(prevPrice, usdPrice)
             const changePercent = (usdPrice.change * 100).toFixed(4)
-            msgChunk += ` ${usdPrice.indicator} (${changePercent}%)`
+            msgChunk += ` ${usdPrice.indicator}`
           }
           return msgChunk
         }), ' | ')
@@ -184,13 +184,13 @@ function listPrices() {
             const prevPrice = prevBTCPrices[curPrice.symbol]
             comparePrices(prevPrice, curPrice)
             const changePercent = (curPrice.change * 100).toFixed(4)
-            msgChunk += ` ${curPrice.indicator} (${changePercent}%)`
+            msgChunk = `${msgChunk} ${curPrice.indicator}`
           }
           return msgChunk
         }), ' | ')
       console.log(msg2)
       prevBTCPrices = _.keyBy(btcPrices, 'symbol')
-  })
+    })
 }
 
 function printArb() {
