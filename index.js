@@ -157,13 +157,13 @@ let prevBTCPrices
 function listPrices() {
   const usdPricesSymbols = ['BTC', 'BCH', 'ETH', 'LTC']
   const btcPricesSymbols = ['BCC', 'XRP']
-  Promise.resolve()
-    .then(() => {
-      console.log('---------------------------------')
-    })
-    .then(() => getUSDPrices(usdPricesSymbols))
-    .then((usdPrices) => {
-      const msg =
+  const promises = [getUSDPrices(usdPricesSymbols), getBTCTargetPrices('bittrex', btcPricesSymbols)]
+  Promise.all(promises)
+  .then((results)=>{
+    console.log('---------------------------------')
+    const usdPrices = results[0]
+    const btcPrices = results[1]
+    const msg1 =
         _.join(_.map(usdPrices, (usdPrice) => {
           let msgChunk = `${usdPrice.symbol}:$${usdPrice.price}`
           if (prevUSDPrices) {
@@ -174,12 +174,10 @@ function listPrices() {
           }
           return msgChunk
         }), ' | ')
-      console.log(msg)
+      console.log(msg1)
       prevUSDPrices = _.keyBy(usdPrices, 'symbol')
-    })
-    .then(() => getBTCTargetPrices('bittrex', btcPricesSymbols))
-    .then((btcPrices) => {
-      const msg =
+
+      const msg2 =
         _.join(_.map(btcPrices, (curPrice) => {
           let msgChunk = `BTC-${curPrice.symbol}:${curPrice.price}`
           if (prevBTCPrices) {
@@ -190,9 +188,9 @@ function listPrices() {
           }
           return msgChunk
         }), ' | ')
-      console.log(msg)
+      console.log(msg2)
       prevBTCPrices = _.keyBy(btcPrices, 'symbol')
-    })
+  })
 }
 
 function printArb() {
